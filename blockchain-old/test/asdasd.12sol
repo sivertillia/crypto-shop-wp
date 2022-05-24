@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-3.0
+
+// pragma solidity 0.6.2;
+pragma solidity >=0.7.0 <0.9.0;
+
+// import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+
+contract Timer {
+    uint _start;
+    uint _end;
+
+    modifier timeOver{
+        require(block.timestamp <= _end, "Timer is event");
+        _;
+    }
+
+    function start() public {
+        _start = block.timestamp;
+    }
+
+    function end(uint totalTime) public {
+        _end = totalTime+_start;
+    }
+
+    function getTimeLeft() public timeOver view returns(uint) {
+        return(_end-block.timestamp);
+    }
+}

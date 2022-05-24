@@ -1,0 +1,1 @@
+cd plugin/ && zip -r dev.zip dev/
