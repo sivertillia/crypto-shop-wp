@@ -121,15 +121,12 @@ function wc_crypto_payments_gateway_init()
                 throw new Exception(__($error_message, 'wc-gateway-cpg-payments'));
             }
 
-            $args = array();
-            $response = wp_rempte_post('url', $args);
-
-            if (!is_wp_error($response)) {
-                $body = json_decode($response['body'], true);
-                if ($body['response']['statusCode'] == 'APPROVED') {
-
-                }
-            }
+            WC()->cart->empty_cart();
+            $redirect_path = plugin_dir_url(__FILE__) . 'pay.php';
+            return array(
+                'result' => 'success',
+                'redirect' => $redirect_path,
+            );
         }
     }
 }
