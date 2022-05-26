@@ -20,4 +20,5 @@ echo '<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha25
 echo '<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>';
 echo '<button id="connect_metamask">Connect MetaMask</button>';
 echo '<button id="pay">Pay</button>';
+echo '<button id="balance">Balance </button>';
 echo '<script src="./main.js" type="application/javascript"></script>';

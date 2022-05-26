@@ -12,10 +12,10 @@ getContractPaymentProcessor().then(async (contract) => {
   // Dai = await import('http://localhost:8000/file/contracts/Dai.json', { assert: { type: 'json' } })
 })
 
-getContractDai().then(async (contract) => {
-  console.log(contract)
-  Dai = contract
-})
+// getContractDai().then(async (contract) => {
+//   console.log(contract)
+//   Dai = contract
+// })
 
 
 
@@ -32,18 +32,18 @@ async function getContractPaymentProcessor() {
   })
 }
 
-async function getContractDai() {
-  return new Promise((resolve, reject) => {
-    jQuery.ajax({
-      type: 'GET',
-      url: 'http://localhost:8000/file/contracts/Dai.json',
-      dataType: 'json',
-      success: (obj) => {
-        resolve(obj)
-      },
-    })
-  })
-}
+// async function getContractDai() {
+//   return new Promise((resolve, reject) => {
+//     jQuery.ajax({
+//       type: 'GET',
+//       url: 'http://localhost:8000/file/contracts/Dai.json',
+//       dataType: 'json',
+//       success: (obj) => {
+//         resolve(obj)
+//       },
+//     })
+//   })
+// }
 
 const getBlockchain = () => {
   return new Promise(async (resolve) => {
@@ -60,13 +60,13 @@ const getBlockchain = () => {
         PaymentProcessor.abi,
         signer,
       )
-      const dai = new ethers.Contract(
-        Dai.networks[window.ethereum.networkVersion].address, //for mainnet and public testnet replace by address of already deployed dai token
-        Dai.abi,
-        signer,
-      )
+      // const dai = new ethers.Contract(
+      //   Dai.networks[window.ethereum.networkVersion].address, //for mainnet and public testnet replace by address of already deployed dai token
+      //   Dai.abi,
+      //   signer,
+      // )
 
-      resolve({ provider, paymentProcessor, dai })
+      resolve({ provider, paymentProcessor, signer })
     }
     resolve({ provider: undefined, paymentProcessor: undefined, dai: undefined })
   })
@@ -74,21 +74,27 @@ const getBlockchain = () => {
 
 const button = document.getElementById('connect_metamask')
 const buttonPay = document.getElementById('pay')
+const buttonGetBalance = document.getElementById('balance')
 let dai = null
 let paymentProcessor = null
 let provider = null
+let signer = null
 button.addEventListener('click',async (e) => {
   console.log('Click')
   const data = await getBlockchain()
-  dai = data.dai
+  // dai = data
   paymentProcessor = data.paymentProcessor
   provider = data.provider
+  signer = data.signer
 })
 
 buttonPay.addEventListener('click', async (e) => {
-  const price = ethers.utils.parseEther('100')
-  const tx1 = await dai.approve(paymentProcessor.address, price)
-  await tx1.wait()
-  const tx2 = await paymentProcessor.pay(price, 1)
-  await tx2.wait()
+  const price = ethers.utils.parseEther('1', 'ether')
+  console.log(price)
+})
+
+buttonGetBalance.addEventListener('click', async (e) => {
+  const ether = ethers.utils.formatEther(await paymentProcessor.getBalance())
+  // console.log(parseInt((await paymentProcessor.getBalance())._hex, 16))
+  console.log(ether)
 })
