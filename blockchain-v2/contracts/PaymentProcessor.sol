@@ -7,7 +7,6 @@ contract PaymentProcessor {
 
     event PaymentDone(
         address payer,
-        uint amount,
         uint paymentId,
         uint date
     );
@@ -20,9 +19,9 @@ contract PaymentProcessor {
         return address(this).balance;
     }
 
-    function pay(uint amount, uint paymentId) public payable {
+    function pay(uint paymentId) public payable {
 //        require(msg.value > .01 ether);
 
-        emit PaymentDone(msg.sender, amount, paymentId, block.timestamp);
+        emit PaymentDone(msg.sender, paymentId, block.timestamp);
     }
 }
