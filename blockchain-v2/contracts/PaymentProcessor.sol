@@ -7,9 +7,21 @@ contract PaymentProcessor {
 
     event PaymentDone(
         address payer,
-        uint paymentId,
+        uint orderId,
         uint date
     );
+
+    event FallBackEvent(
+        address payer,
+        uint date
+    );
+
+    event ReceiveEvent(
+        address payer,
+        uint date
+    );
+
+
 
     constructor() public {
         owner = msg.sender;
@@ -19,9 +31,20 @@ contract PaymentProcessor {
         return address(this).balance;
     }
 
-    function pay(uint paymentId) public payable {
+    function pay(uint orderId) public payable {
 //        require(msg.value > .01 ether);
 
-        emit PaymentDone(msg.sender, paymentId, block.timestamp);
+        emit PaymentDone(msg.sender, orderId, block.timestamp);
+    }
+
+    fallback() external payable {
+        // custom function code
+        emit FallBackEvent(msg.sender, block.timestamp);
+    }
+
+    receive() external payable {
+        // custom function code
+        emit ReceiveEvent(msg.sender, block.timestamp);
+        emit PaymentDone(msg.sender, 2, block.timestamp);
     }
 }

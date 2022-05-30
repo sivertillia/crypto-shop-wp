@@ -1,5 +1,3 @@
-Web3 = require('web3')
-
 let PaymentProcessorCt = null
 let web3 = null
 let account = null
@@ -8,7 +6,7 @@ let address = null
 
 getContractPaymentProcessor().then(async (contract) => {
   PaymentProcessorCt = contract
-  const network = window.ethereum.networkVersion || 5777
+  const network = window?.ethereum?.networkVersion || 5777
   address = PaymentProcessorCt.networks[network].address
 })
 
@@ -47,8 +45,9 @@ const getBlockchain = () => {
       const qrCode = new QRCodeStyling({
         width: 300,
         height: 300,
+        margin: 15,
         type: 'svg',
-        data: address,
+        data: `ethereum:${address}/pay?gas=300000&value=1e18&uint256=3`,
         image: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
         dotsOptions: {
           color: '#F6851B',
@@ -65,6 +64,7 @@ const getBlockchain = () => {
           type: 'extra-rounded',
         },
       })
+      console.log(address)
 
       qrCode.append(document.getElementById('canvas'))
       // qrCode.download({ name: 'qr', extension: 'svg' })
@@ -74,10 +74,10 @@ const getBlockchain = () => {
         console.log('----------Event----------')
         console.log(error, event)
       })
-      const event = lcContract.PaymentDone({}, { fromBlock: 0, toBlock: 'latest' })
-      event.watch((error, result) => {
-        console.log('EVEMT')
-      })
+      // const event = lcContract.PaymentDone({}, { fromBlock: 0, toBlock: 'latest' })
+      // event.watch((error, result) => {
+      //   console.log('EVEMT')
+      // })
 
 
 

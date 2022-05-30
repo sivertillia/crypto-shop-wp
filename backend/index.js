@@ -32,11 +32,23 @@ const init = async () => {
   // event.watch((error, result) => {
   //   console.log('EVEMT')
   // })
-
-  paymentProcessor.once('PaymentDone', async (error, event) => {
-    console.log('----------Event----------')
-    // window.href.
+  paymentProcessor.events.allEvents({
+    fromBlock: 0,
+    toBlock: 'latest',
+  }, (error, event) => {
+    console.log('allEvents', event)
   })
+
+  // paymentProcessor.once('PaymentDone', async (error, event) => {
+  //   console.log('----------Event----------')
+  //   // window.href.
+  // })
+  //
+  // paymentProcessor.once('ReceiveEvent', async (error, event) => {
+  //   console.log('----------Event ReceiveEvent----------')
+  //   console.log(1111)
+  //   // window.href.
+  // })
   // paymentProcessor.getPastEvents('PaymentDone', {})
   //   .then(results => console.log(results))
   //   .catch(err => console.log(err));
