@@ -15,6 +15,14 @@ if (file_exists($root . '/wp-load.php')) {
 } else {
     require_once($root . '/wp-config.php');
 } ?>
+
+<?php
+$address = $_GET['address'];
+$payment_id = $_GET['payment_id'];
+$amount = $_GET['amount'];
+$order_id = $_GET['order_id'];
+$redirect_url = urldecode($_GET['redirect_url']);
+?>
 <div>
     <h1>Hello, World!</h1>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -26,4 +34,11 @@ if (file_exists($root . '/wp-load.php')) {
     <button id="balance">Balance </button>
     <div id="canvas" style="text-align: center"></div>
     <script src="main.js" type="application/javascript"></script>
+    <div class='hidden'
+         data-payment_id='<?= $payment_id ?>'
+         data-address='<?= $address ?>'
+         data-amount='<?= $amount ?>'
+         data-order_id='<?= $order_id ?>'
+         data-redirect_url='<?= $redirect_url ?>'
+    ></div>
 </div>

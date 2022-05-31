@@ -114,19 +114,41 @@ function wc_crypto_payments_gateway_init()
             global $wp;
             $checkout = WC()->checkout();
             $order = wc_get_order($order_id);
+            $order_amount = $order->get_total();
 
             if (is_null($order)) {
                 $error_message = 'Order not found';
                 error_log($error_message);
                 throw new Exception(__($error_message, 'wc-gateway-cpg-payments'));
             }
+            $api_url = 'http://localhost:8000';
 
-            WC()->cart->empty_cart();
-            $redirect_path = plugin_dir_url(__FILE__) . 'pay.php';
-            return array(
-                'result' => 'success',
-                'redirect' => $redirect_path,
-            );
+            $request = wp_remote_post("{$api_url}/api/init", array(
+                'method' => 'POST',
+                'timeout' => 180,
+                'data_format' => 'body',
+                'headers' => array(
+                    'Content-Type' => 'application/json',
+                ),
+                'body' => json_encode([
+                    'amount' => (float)$order_amount,
+                    'order_id' => $order_id,
+                ]),
+            ));
+
+            $response_body = $request['body'];
+            $response_body_json = json_decode($response_body, TRUE);
+
+            if ($response_body_json['payment_id']) {
+//                WC()->cart->empty_cart();
+                $redirect_path = plugin_dir_url(__FILE__) . 'pay.php' . "?address={$response_body_json['address']}" . "&payment_id={$response_body_json['payment_id']}" . "&amount={$response_body_json['amount']}" . '&redirect_url=' . urlencode($this->get_return_url($order));
+                return array(
+                    'result' => 'success',
+                    'redirect' => $redirect_path,
+                );
+
+            }
+            throw new Exception(__('Error', 'wc-gateway-cpg-payments'));
         }
     }
 }
