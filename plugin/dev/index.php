@@ -139,9 +139,15 @@ function wc_crypto_payments_gateway_init()
             $response_body = $request['body'];
             $response_body_json = json_decode($response_body, TRUE);
 
-            if ($response_body_json['payment_id']) {
-//                WC()->cart->empty_cart();
-                $redirect_path = plugin_dir_url(__FILE__) . 'pay.php' . "?address={$response_body_json['address']}" . "&payment_id={$response_body_json['payment_id']}" . "&amount={$response_body_json['amount']}" . '&redirect_url=' . urlencode($this->get_return_url($order));
+            if ($response_body_json['order_id'] === $order_id) {
+                WC()->cart->empty_cart();
+                $redirect_path = plugin_dir_url(__FILE__) . 'pay.php' .
+                    "?address={$response_body_json['address']}" .
+                    "&order_id={$response_body_json['order_id']}" .
+                    "&amount={$response_body_json['amount']}" .
+                    "&eth_usd={$response_body_json['eth']}" .
+                    "&created_time={$response_body_json['created_time']}" .
+                    "&redirect_url=" . urlencode($this->get_return_url($order));
                 return array(
                     'result' => 'success',
                     'redirect' => $redirect_path,

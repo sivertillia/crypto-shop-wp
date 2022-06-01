@@ -3,18 +3,27 @@ $(document).ready(() => {
   let account = null
   let lcContract = null;
   let address = null;
+  let amount = null;
+  let created_time = null;
+  let eth = null;
+  let eth_usd = null;
+  let wei = null;
+  let order_id = null;
+  let redirect_url = null;
 
 
-  const generateQrCode = () => {
+  const generateQrCode = (valueWei, valueEth) => {
     const qrCode = new QRCodeStyling({
       width: 300,
       height: 300,
       margin: 15,
       type: 'svg',
-      data: `ethereum:${address}/pay?gas=300000&value=1e18&uint256=3`,
-      image: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
+      data: `ethereum:${address}/pay?gas=300000&value=${valueWei}&uint256=3`,
+      image: 'https://cdn.worldvectorlogo.com/logos/ethereum-1.svg',
+      // image: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
       dotsOptions: {
-        color: '#F6851B',
+        color: '#565656',
+        // color: '#F6851B',
         type: 'rounded',
       },
       imageOptions: {
@@ -24,7 +33,7 @@ $(document).ready(() => {
         color: 'rgba(255,255,255,0)',
       },
       cornersSquareOptions: {
-        color: '#CD6116',
+        color: '#000000',
         type: 'extra-rounded',
       },
     })
@@ -38,8 +47,31 @@ $(document).ready(() => {
     }
 
     address = $('div.hidden').data('address')
-    generateQrCode()
+    amount = $('div.hidden').data('amount')
+    created_time = $('div.hidden').data('created_time')
+    order_id = $('div.hidden').data('order_id')
+    eth_usd = $('div.hidden').data('eth_usd')
+    redirect_url = $('div.hidden').data('redirect_url')
+    document.getElementById('account').value = address
+    updateCoins(eth_usd)
+    updateRender(wei, eth)
+    createInterval()
   })();
+
+  const formatBalanceInTime = (ms) => {
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((ms / (1000 * 60 * 60)) % 24)
+    const minutes = Math.floor((ms / (1000 * 60)) % 60)
+    const seconds = Math.floor((ms / 1000) % 60)
+    const daysF = (days < 10) ? '0' + days : days
+    const hoursF = (hours < 10) ? '0' + hours : hours
+    const minutesF = (minutes < 10) ? '0' + minutes : minutes
+    const secondsF = (seconds < 10) ? '0' + seconds : seconds
+    const mm_ss = `${minutesF}:${secondsF}`
+    const hh_mm_ss = `${hoursF}:${minutesF}:${secondsF}`
+    const dd_hh_mm_ss = `${daysF}:${hoursF}:${minutesF}:${secondsF}`
+    return [hh_mm_ss, { hours, minutes, seconds }]
+  }
 
 
 
@@ -78,5 +110,40 @@ $(document).ready(() => {
     console.log(ether)
   })
 
+  function createInterval() {
+    const intervalId = setInterval(() => {
+      const time = new Date(created_time).getTime()
+      const cTime = new Date().getTime()
+      const [timer, _] = formatBalanceInTime(cTime-time)
+      if (cTime-time < 0 || Number.isNaN(cTime-time)) clearInterval(intervalId)
+      document.getElementById('time').innerText = timer;
+    }, 100)
+
+    setInterval(async () => {
+      const result = await axios.get(`http://localhost:8000/api/coin?order_id=${order_id}`);
+      eth_usd = result?.data?.eth;
+      updateCoins(eth_usd)
+      updateRender(wei, eth)
+    }, 300_000) //300_000
+
+    setInterval(async () => {
+      const response = await axios.get(`http://localhost:8000/api/payment?order_id=${order_id}`);
+      if (response?.data?.payment) {
+        window.location.href = redirect_url;
+      }
+    }, 3000)
+  }
+
+  function updateRender(valueWei, valueEth) {
+    document.getElementById('amount').innerText = `${amount}$ -> ${valueEth} ETH -> ${valueWei} WEI`
+    document.getElementById('canvas').innerText = ''
+    generateQrCode(valueWei, valueEth)
+  }
+
+  function updateCoins(c) {
+    console.log(c)
+    eth = amount / c;
+    wei = eth * 10**18;
+  }
 
 });
