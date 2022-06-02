@@ -7,7 +7,7 @@ $(document).ready(() => {
   let created_time = null;
   let eth = null;
   let eth_usd = null;
-  let wei = null;
+  let wei = 0n;
   let order_id = null;
   let redirect_url = null;
 
@@ -18,7 +18,7 @@ $(document).ready(() => {
       height: 300,
       margin: 15,
       type: 'svg',
-      data: `ethereum:${address}/pay?gas=300000&value=${valueWei}&uint256=3`,
+      data: `ethereum:${address}?gas=21000&value=${String(valueWei)}`,
       image: 'https://cdn.worldvectorlogo.com/logos/ethereum-1.svg',
       // image: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
       dotsOptions: {
@@ -73,43 +73,6 @@ $(document).ready(() => {
     return [hh_mm_ss, { hours, minutes, seconds }]
   }
 
-
-
-  const button = document.getElementById('connect_metamask')
-  const buttonPay = document.getElementById('pay')
-  const buttonGetBalance = document.getElementById('balance')
-
-  button.addEventListener('click', async (e) => {
-    if (window.ethereum) {
-      await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const accounts = await web3.eth.getAccounts()
-      account = accounts[0]
-      window.ethereum.on('accountsChanged', async () => {
-        const accounts = await web3.eth.getAccounts()
-        account = accounts[0]
-      })
-    }
-  })
-
-  buttonPay.addEventListener('click', async (e) => {
-    // const price = ethers.utils.parseEther('0.1', 'ether')
-    // await web3.
-    await lcContract.methods.pay('1').send({
-      from: account,
-      value: '10000000000000000',
-      gas: 300000,
-      gasPrice: null,
-    })
-  })
-
-  buttonGetBalance.addEventListener('click', async (e) => {
-    console.log(address)
-    const ether = ethers.utils.formatEther(await web3.eth.getBalance(address))
-    // const ether = ethers.utils.formatEther(await paymentProcessor.getBalance())
-    // console.log(parseInt((await paymentProcessor.getBalance())._hex, 16))
-    console.log(ether)
-  })
-
   function createInterval() {
     const intervalId = setInterval(() => {
       const time = new Date(created_time).getTime()
@@ -138,12 +101,63 @@ $(document).ready(() => {
     document.getElementById('amount').innerText = `${amount}$ -> ${valueEth} ETH -> ${valueWei} WEI`
     document.getElementById('canvas').innerText = ''
     generateQrCode(valueWei, valueEth)
+    generateButton(valueWei, valueEth)
   }
 
   function updateCoins(c) {
     console.log(c)
     eth = amount / c;
-    wei = eth * 10**18;
+    wei = BigInt(String(eth * 10**18));
+  }
+
+  function generateButton(valueWei, valueEth) {
+    const button = document.getElementById('connect_metamask')
+    const buttonPay = document.getElementById('pay_metamask')
+    const buttonGetBalance = document.getElementById('balance')
+
+    button.addEventListener('click', async (e) => {
+      if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' })
+        const accounts = await web3.eth.getAccounts()
+        account = accounts[0]
+        window.ethereum.on('accountsChanged', async () => {
+          const accounts = await web3.eth.getAccounts()
+          account = accounts[0]
+        })
+      }
+    })
+
+    buttonPay.addEventListener('click', async (e) => {
+      console.log('Click')
+      // const price = ethers.utils.parseEther('0.1', 'ether')
+      // await web3.
+      console.log(typeof valueWei, valueWei)
+      window.ethereum
+        .request({
+          method: 'eth_sendTransaction',
+          params:[{
+            from: account,
+            to: address,
+            value: valueWei.toString(16),
+          }],
+        })
+        .then(txHash => console.log(txHash))
+        .catch(error => console.log(error))
+      // await lcContract.methods.pay('1').send({
+      //   from: account,
+      //   value: '10000000000000000',
+      //   gas: 300000,
+      //   gasPrice: null,
+      // })
+    })
+
+    buttonGetBalance.addEventListener('click', async (e) => {
+      console.log(address)
+      const ether = ethers.utils.formatEther(await web3.eth.getBalance(address))
+      // const ether = ethers.utils.formatEther(await paymentProcessor.getBalance())
+      // console.log(parseInt((await paymentProcessor.getBalance())._hex, 16))
+      console.log(ether)
+    })
   }
 
 });

@@ -32,14 +32,14 @@ $eth_usd = urldecode($_GET['eth_usd']);
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
     <script type="text/javascript" src="https://unpkg.com/axios@0.27.2/dist/axios.min.js"></script>
     <link href="style.css" rel="stylesheet">
-    <button id="pay">Pay</button>
     <button id="balance">Balance </button>
     <div id="time" style="text-align: center; font-size: 48px; color: #F6851B;"></div>
     <div id="amount" style="text-align: center; font-size: 38px; color: #F6851B;"></div>
     <input id="account" class="account" disabled>
     <div id="canvas" style="text-align: center"></div>
     <div class="box_btn">
-        <button id="connect_metamask" class="btn metamask">Connect MetaMask</button>
+        <button id="connect_metamask" class="btn metamask">Ethereum Connect</button>
+        <button id="pay_metamask" class="btn metamask">Send Eth</button>
     </div>
     <script src="main.js" type="application/javascript"></script>
     <div class='hidden'
