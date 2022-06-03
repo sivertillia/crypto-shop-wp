@@ -1,13 +1,12 @@
 const express = require('express')
-const { getContract, initPayment, getCoin, checkPayment } = require('./controller')
+const { getContract, initPayment, getOrder, checkPayment } = require('./controller')
 
 
 const router = new express.Router()
 
 router
-  .get('/getContract', getContract)
   .post('/init', initPayment)
-  .get('/coin', getCoin)
+  .get('/order', getOrder)
   .get('/payment', checkPayment)
 
 module.exports = router

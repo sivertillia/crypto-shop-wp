@@ -50,63 +50,61 @@ function wc_crypto_payments_gateway_init()
             $this->icon = '';
             $this->has_fields = true;
             $this->method_title = 'Crypto Gateway';
-            $this -> method_desciption = 'Description of Crypto Payment gateway';
+            $this->method_desciption = 'Description of Crypto Payment gateway';
 
-            $this->supports = array(
-                'products'
-            );
+            $this->settings['title'] = 'Pay with debit or credit card';
+            $this->settings['description'] = 'Visa and Mastercard accepted. AMEX, Discover, and prepaid cards are not supported.';
 
+            //Load the settings
             $this->init_form_fields();
+            $this->init_settings();
+
+            //Define user set variable
+//            $this->title = $this->get_option('title');
+            $this->description = $this->get_option('description');
+//            $this->account = $this->get_option('account');
         }
 
         public function init_form_fields()
         {
-            $this->form_fields = array(
+            $fields = $this->get_fields();
+            $this->form_fields = apply_filters('wc_crypto_payments_form_fields', $fields);
+        }
+
+        public function get_fields()
+        {
+            return array(
                 'enabled' => array(
-                    'title'       => 'Enable/Disable',
-                    'label'       => 'Enable Crypto Gateway',
-                    'type'        => 'checkbox',
+                    'title' => 'Enable/Disable',
+                    'label' => 'Enable Crypto Gateway',
+                    'type' => 'checkbox',
                     'description' => '',
-                    'default'     => 'no'
+                    'default' => 'no',
                 ),
                 'title' => array(
-                    'title'       => 'Title',
-                    'type'        => 'text',
+                    'title' => 'Title',
+                    'type' => 'text',
                     'description' => 'This controls the title which the user sees during checkout.',
-                    'default'     => 'Credit Card',
-                    'desc_tip'    => true,
+                    'default' => 'Pay with crypto',
+                    'desc_tip' => true,
                 ),
                 'description' => array(
-                    'title'       => 'Description',
-                    'type'        => 'textarea',
+                    'title' => 'Description',
+                    'type' => 'textarea',
                     'description' => 'This controls the description which the user sees during checkout.',
-                    'default'     => 'Pay with your credit card via our super-cool payment gateway.',
+                    'default' => 'Pay with your credit card via our super-cool payment gateway.',
                 ),
-                'testmode' => array(
-                    'title'       => 'Test mode',
-                    'label'       => 'Enable Test Mode',
-                    'type'        => 'checkbox',
-                    'description' => 'Place the payment gateway in test mode using test API keys.',
-                    'default'     => 'yes',
-                    'desc_tip'    => true,
+                'account' => array(
+                    'title' => 'Account',
+                    'type' => 'text',
+                    'default' => '0xd371c43496a8F53bC7DB24e93290489FbDd52bB3',
                 ),
-                'test_publishable_key' => array(
-                    'title'       => 'Test Publishable Key',
-                    'type'        => 'text'
-                ),
-                'test_private_key' => array(
-                    'title'       => 'Test Private Key',
-                    'type'        => 'password',
-                ),
-                'publishable_key' => array(
-                    'title'       => 'Live Publishable Key',
-                    'type'        => 'text'
-                ),
-                'private_key' => array(
-                    'title'       => 'Live Private Key',
-                    'type'        => 'password'
-                )
             );
+        }
+
+        public function payment_fields()
+        {
+            echo wpautop(wptexturize($this->description));
         }
 
         public function process_payment($order_id)
@@ -119,7 +117,7 @@ function wc_crypto_payments_gateway_init()
             if (is_null($order)) {
                 $error_message = 'Order not found';
                 error_log($error_message);
-                throw new Exception(__($error_message, 'wc-gateway-cpg-payments'));
+                throw new Exception(__($error_message, 'wc-gateway-crypto-payments'));
             }
             $api_url = 'http://localhost:8000';
 
@@ -132,6 +130,7 @@ function wc_crypto_payments_gateway_init()
                 ),
                 'body' => json_encode([
                     'amount' => (float)$order_amount,
+                    "redirect_url" => urlencode($this->get_return_url($order)),
                     'order_id' => $order_id,
                 ]),
             ));
@@ -139,22 +138,17 @@ function wc_crypto_payments_gateway_init()
             $response_body = $request['body'];
             $response_body_json = json_decode($response_body, TRUE);
 
-            if ($response_body_json['order_id'] === $order_id) {
+            if ($response_body_json['success']) {
                 WC()->cart->empty_cart();
                 $redirect_path = plugin_dir_url(__FILE__) . 'pay.php' .
-                    "?address={$response_body_json['address']}" .
-                    "&order_id={$response_body_json['order_id']}" .
-                    "&amount={$response_body_json['amount']}" .
-                    "&eth_usd={$response_body_json['eth']}" .
-                    "&created_time={$response_body_json['created_time']}" .
-                    "&redirect_url=" . urlencode($this->get_return_url($order));
+                    "?order_id=" . $order_id;
                 return array(
                     'result' => 'success',
                     'redirect' => $redirect_path,
                 );
 
             }
-            throw new Exception(__('Error', 'wc-gateway-cpg-payments'));
+            throw new Exception(__('Error', 'wc-gateway-crypto-payments'));
         }
     }
 }

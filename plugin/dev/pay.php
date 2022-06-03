@@ -17,13 +17,7 @@ if (file_exists($root . '/wp-load.php')) {
 } ?>
 
 <?php
-$address = $_GET['address'];
-$payment_id = $_GET['payment_id'];
-$amount = $_GET['amount'];
-$order_id = $_GET['order_id'];
-$redirect_url = urldecode($_GET['redirect_url']);
-$created_time = urldecode($_GET['created_time']);
-$eth_usd = urldecode($_GET['eth_usd']);
+$order_id = urldecode($_GET['order_id']);
 ?>
 <div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -43,12 +37,6 @@ $eth_usd = urldecode($_GET['eth_usd']);
     </div>
     <script src="main.js" type="application/javascript"></script>
     <div class='hidden'
-         data-payment_id='<?= $payment_id ?>'
-         data-address='<?= $address ?>'
-         data-amount='<?= $amount ?>'
          data-order_id='<?= $order_id ?>'
-         data-redirect_url='<?= $redirect_url ?>'
-         data-eth_usd='<?= $eth_usd ?>'
-         data-created_time='<?= $created_time ?>'
     ></div>
 </div>
