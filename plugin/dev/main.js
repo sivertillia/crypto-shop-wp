@@ -11,7 +11,6 @@ $(document).ready(() => {
   let redirect_url = null;
   let coins = null;
   let coinsArray = null;
-  let coinsFilterArray = null;
   let selectedCoin = 'ethereum';
 
   const data = {
@@ -81,8 +80,6 @@ $(document).ready(() => {
         if(account) setAddressIntoButton(account)
       })
       if(account) setAddressIntoButton(account);
-      if(selectedCoin) document.getElementById('selectCoinButton').innerText = selectedCoin;
-      document.getElementById('currencyImage').url = `https://cdn.worldvectorlogo.com/logos/${selectedCoin}-1.svg`
     }
   }
 
@@ -146,9 +143,10 @@ $(document).ready(() => {
     axios.get(`http://localhost:8000/api/order?order_id=${order_id}`).then(({ data }) => {
       address = data.address;
       amount = data.amount;
-      if (!coinsArray) renderCoinsListV2(Object.keys(data.coins))
+      if (!coinsArray) renderCoinsList(Object.keys(data.coins))
       coinsArray = Object.keys(data.coins)
       coins = data.coins;
+      console.log({ coins })
       const convertedValue = amount / coins[selectedCoin]
       wei = BigInt(String(convertedValue * 10**18))
       console.log(data);
@@ -166,42 +164,25 @@ $(document).ready(() => {
     button.innerText = `${first4}...${last4}`
   }
 
-  function renderCoinsListV2(coins) {
+  function renderCoinsList(coinsNames) {
     const list = document.getElementById("tokensList");
     list.innerHTML = null;
 
     function makeElem(coinName) {
       let li = document.createElement('li')
-      li.innerHTML = `${coinName}`;
-      return li;
-    }
-
-    const listContainer = document.createElement('ul');
-    const listFragment = document.createDocumentFragment();
-    coins.forEach((item) => {
-      try {
-        const listElement = makeElem(item);
-        listFragment.append(listElement);
-      } catch (Error) {
-        console.log(Error);
+      li.innerHTML = `<img id="currencyImage" src="${data[coinName].logo}">${coinName}`;
+      li.setAttribute("data-dismiss","modal")
+      li.onclick = () => {
+        selectedCoin = coinName;
+        updateRender(wei, amount/coins[coinName])
+        document.getElementById('searchToken').value = ''
       }
-    });
-    listContainer.append(listFragment);
-    list.append(listContainer);
-  }
-
-  function renderCoinsList(coins) {
-    const list = document.getElementById("tokensList");
-
-    function makeElem(coinName) {
-      let li = document.createElement('li')
-      li.innerHTML = `${coinName}`;
       return li;
     }
 
     const listContainer = document.createElement('ul');
     const listFragment = document.createDocumentFragment();
-    Object.keys(coins).forEach((item) => {
+    coinsNames.forEach((item) => {
       try {
         const listElement = makeElem(item);
         listFragment.append(listElement);
@@ -219,6 +200,10 @@ $(document).ready(() => {
     const searchToken = document.getElementById('searchToken')
     const sorterToken = document.getElementById('sorterToken')
 
+    if (selectedCoin) {
+      document.getElementById('selectCoinButton').innerHTML = `<img id="currencyImage" src="${data[selectedCoin].logo}" /> ${selectedCoin}`;
+    }
+
     button.addEventListener('click', async (e) => {
       if (window.ethereum) {
         await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -226,28 +211,29 @@ $(document).ready(() => {
     })
     let sorter = true;
 
-    sorterToken.addEventListener('click', async (e) => {
-      let sorterArray
+    sorterToken.onclick = async (e) => {
+
+      let sorterArray = [...coinsArray]
+      console.log({ sorterArray })
       if (sorter) {
         sorter = false
-        sorterArray = coinsFilterArray.sort()
+        sorterArray = sorterArray.sort()
       } else {
         sorter = true
-        sorterArray = coinsFilterArray.sort().reverse()
+        sorterArray = sorterArray.sort().reverse()
       }
       console.log(sorterArray, sorter)
-      renderCoinsListV2(sorterArray)
-    })
+      renderCoinsList(sorterArray)
+    }
 
-    searchToken.addEventListener('input', () => {
+    searchToken.oninput = () => {
       if (!coins) return
       const searchTokenText = document.getElementById('searchToken').value.toLowerCase()
       console.log(searchTokenText, coins)
-      coinsFilterArray = coinsArray.filter(i => i.includes(searchTokenText))
-      renderCoinsListV2(coinsFilterArray)
-    })
+      renderCoinsList(coinsArray.filter(i => i.includes(searchTokenText)))
+    }
 
-    buttonPay.addEventListener('click', async (e) => {
+    buttonPay.onclick = async (e) => {
       console.log('Click')
       // const price = ethers.utils.parseEther('0.1', 'ether')
       // await web3.
@@ -269,8 +255,7 @@ $(document).ready(() => {
       //   gas: 300000,
       //   gasPrice: null,
       // })
-    })
-
+    }
   //   buttonGetBalance.addEventListener('click', async (e) => {
   //     console.log(address)
   //     const ether = ethers.utils.formatEther(await web3.eth.getBalance(address))
