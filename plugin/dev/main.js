@@ -1,7 +1,6 @@
 $(document).ready(() => {
   let web3 = null
   let account = null
-  let lcContract = null;
   let address = null;
   let amount = null;
   let created_time = null;
@@ -13,6 +12,19 @@ $(document).ready(() => {
   let coins = null;
   let selectedCoin = 'ethereum';
 
+  const data = {
+    bitcoin: {
+      primaryColor: '#f7931a',
+      secondaryColor: '#fc8a00',
+      logo: 'https://cryptologos.cc/logos/bitcoin-btc-logo.svg'
+    },
+    ethereum: {
+      primaryColor: '#565656',
+      secondaryColor: '#000000',
+      logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg'
+    },
+  }
+
 
   const generateQrCode = (valueWei, valueEth) => {
     const qrCode = new QRCodeStyling({
@@ -20,12 +32,12 @@ $(document).ready(() => {
       height: 300,
       margin: 15,
       type: 'svg',
-      data: `ethereum:${address}?gas=21000&value=${String(valueWei)}`,
-      image: 'https://cdn.worldvectorlogo.com/logos/ethereum-1.svg',
+      data: `${selectedCoin}:${address}?gas=21000&value=${String(valueWei)}`,
+      image: data[selectedCoin].logo,
+      // image: `https://cdn.worldvectorlogo.com/logos/${selectedCoin}.svg`,
       // image: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
       dotsOptions: {
-        color: '#565656',
-        // color: '#F6851B',
+        color: data[selectedCoin].primaryColor,
         type: 'rounded',
       },
       imageOptions: {
@@ -35,7 +47,7 @@ $(document).ready(() => {
         color: 'rgba(255,255,255,0)',
       },
       cornersSquareOptions: {
-        color: '#000000',
+        color: data[selectedCoin].secondaryColor,
         type: 'extra-rounded',
       },
     })
@@ -47,15 +59,8 @@ $(document).ready(() => {
     if (window.ethereum) {
       web3 = new Web3(window.ethereum)
     }
-
-    address = $('div.hidden').data('address')
-    amount = $('div.hidden').data('amount')
-    created_time = $('div.hidden').data('created_time')
     order_id = $('div.hidden').data('order_id')
-    eth_usd = $('div.hidden').data('eth_usd')
-    redirect_url = $('div.hidden').data('redirect_url')
 
-    document.getElementById('account').value = address
     await init()
     updateOrderDetails()
     updateCoins(eth_usd)
@@ -103,12 +108,12 @@ $(document).ready(() => {
     //   document.getElementById('time').innerText = timer;
     // }, 100)
 
-    setInterval(async () => {
-      const result = await axios.get(`http://localhost:8000/api/coin?order_id=${order_id}`);
-      eth_usd = result?.data?.eth;
-      updateCoins(eth_usd)
-      updateRender(wei, eth)
-    }, 300_000) //300_000
+    // setInterval(async () => {
+    //   const result = await axios.get(`http://localhost:8000/api/coin?order_id=${order_id}`);
+    //   eth_usd = result?.data?.eth;
+    //   updateCoins(eth_usd)
+    //   updateRender(wei, eth)
+    // }, 300_000) //300_000
 
     setInterval(async () => {
       updateOrderDetails()
@@ -141,8 +146,10 @@ $(document).ready(() => {
       amount = data.amount;
       if (!coins) renderCoinsList(data.coins)
       coins = data.coins;
+      const convertedValue = amount / coins[selectedCoin]
+      wei = BigInt(String(convertedValue * 10**18))
       console.log(data);
-      document.getElementById('amount_input').value = amount;
+      document.getElementById('amount_input').value = `${amount}$`;
       document.getElementById('converted_amount').value = amount / coins[selectedCoin];
     });
   }

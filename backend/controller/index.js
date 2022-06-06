@@ -57,8 +57,8 @@ module.exports.checkPayment = async (req, res) => {
   const product = state.products.get(+order_id)
   if (!product) return res.status(400).json({ error: 'Not Found' })
   const valueAccountN = BigInt(await web3.eth.getBalance(product.address))
-  const eth = product.amount * product.coins.ethereum
-  const productValueN = BigInt(eth * 10 ** 18)
+  const eth = product.amount / product.coins.ethereum
+  const productValueN = BigInt(String(eth * 10 ** 18))
   console.log(productValueN, valueAccountN, valueAccountN >= productValueN)
   if (valueAccountN >= productValueN) {
     const gasPrice = await web3.eth.getGasPrice()
