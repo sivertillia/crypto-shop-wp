@@ -16,6 +16,7 @@ const createCron = (web3) => {
         state.products.set(key, {
           ...product,
           coins: coins,
+          updated_time: new Date().toISOString(),
         })
       }
     }

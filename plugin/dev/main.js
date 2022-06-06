@@ -10,6 +10,7 @@ $(document).ready(() => {
   let order_id = null;
   let redirect_url = null;
   let coins = null;
+  let coinsArray = null;
   let selectedCoin = 'ethereum';
 
   const data = {
@@ -144,7 +145,8 @@ $(document).ready(() => {
     axios.get(`http://localhost:8000/api/order?order_id=${order_id}`).then(({ data }) => {
       address = data.address;
       amount = data.amount;
-      if (!coins) renderCoinsList(data.coins)
+      if (!coinsArray) renderCoinsListV2(Object.keys(data.coins))
+      coinsArray = Object.keys(data.coins)
       coins = data.coins;
       const convertedValue = amount / coins[selectedCoin]
       wei = BigInt(String(convertedValue * 10**18))
@@ -161,6 +163,30 @@ $(document).ready(() => {
     const first4 = account.slice(0,4)
     const last4 = account.slice(account.length - 4)
     button.innerText = `${first4}...${last4}`
+  }
+
+  function renderCoinsListV2(coins) {
+    const list = document.getElementById("tokensList");
+    list.innerHTML = null;
+
+    function makeElem(coinName) {
+      let li = document.createElement('li')
+      li.innerHTML = `${coinName}`;
+      return li;
+    }
+
+    const listContainer = document.createElement('ul');
+    const listFragment = document.createDocumentFragment();
+    coins.forEach((item) => {
+      try {
+        const listElement = makeElem(item);
+        listFragment.append(listElement);
+      } catch (Error) {
+        console.log(Error);
+      }
+    });
+    listContainer.append(listFragment);
+    list.append(listContainer);
   }
 
   function renderCoinsList(coins) {
@@ -189,12 +215,19 @@ $(document).ready(() => {
   function generateButton(valueWei, valueEth) {
     const button = document.getElementById('connect_metamask')
     const buttonPay = document.getElementById('pay_metamask')
-    const buttonGetBalance = document.getElementById('balance')
+    const searchToken = document.getElementById('searchToken')
 
     button.addEventListener('click', async (e) => {
       if (window.ethereum) {
         await window.ethereum.request({ method: 'eth_requestAccounts' })
       }
+    })
+
+    searchToken.addEventListener('input', () => {
+      if (!coins) return
+      const searchTokenText = document.getElementById('searchToken').value.toLowerCase()
+      console.log(searchTokenText, coins)
+      renderCoinsListV2(coinsArray.filter(i => i.includes(searchTokenText)))
     })
 
     buttonPay.addEventListener('click', async (e) => {

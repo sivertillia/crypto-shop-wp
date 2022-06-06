@@ -31,27 +31,10 @@ $order_id = urldecode($_GET['order_id']);
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-<!--     <button id="balance">Balance </button> -->
-<!--      <div id="time" style="text-align: center; font-size: 48px; color: #F6851B;"></div> -->
 <div class="pageWrapper">
     <div id="amount" style="text-align: center; font-size: 38px; color: #F6851B;"></div>
     <input id="account" class="account" hidden>
     <div id="canvas" style="text-align: center"></div>
-<!--     <div class="box_btn"> -->
-<!--         <button id="connect_metamask" class="btn metamask">Ethereum Connect</button> -->
-<!--         <button id="pay_metamask" class="btn metamask">Send Eth</button> -->
-<!--     </div> -->
-<!--     <script src="main.js" type="application/javascript"></script> -->
-<!--     <div class='hidden' -->
-<!--          data-payment_id='<?= $payment_id ?>' -->
-<!--          data-address='<?= $address ?>' -->
-<!--          data-amount='<?= $amount ?>' -->
-<!--          data-order_id='<?= $order_id ?>' -->
-<!--          data-redirect_url='<?= $redirect_url ?>' -->
-<!--          data-eth_usd='<?= $eth_usd ?>' -->
-<!--          data-created_time='<?= $created_time ?>' -->
-<!--     ></div> -->
-
 <div class="formWrapper">
          <div class="fromBalance">
              <input id="amount_input" type="text" disabled />
@@ -80,7 +63,7 @@ $order_id = urldecode($_GET['order_id']);
                 </div>
                 <div class="modal-body">
                    <div>
-                    <input type="text" class="searchField" placeholder="Search name"/>
+                    <input type="text" id="searchToken" class="searchField" placeholder="Search name"/>
                    </div>
                    <div style="margin-top: 10px">
                     Token name
