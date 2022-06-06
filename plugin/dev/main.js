@@ -11,6 +11,7 @@ $(document).ready(() => {
   let redirect_url = null;
   let coins = null;
   let coinsArray = null;
+  let coinsFilterArray = null;
   let selectedCoin = 'ethereum';
 
   const data = {
@@ -216,18 +217,34 @@ $(document).ready(() => {
     const button = document.getElementById('connect_metamask')
     const buttonPay = document.getElementById('pay_metamask')
     const searchToken = document.getElementById('searchToken')
+    const sorterToken = document.getElementById('sorterToken')
 
     button.addEventListener('click', async (e) => {
       if (window.ethereum) {
         await window.ethereum.request({ method: 'eth_requestAccounts' })
       }
     })
+    let sorter = true;
+
+    sorterToken.addEventListener('click', async (e) => {
+      let sorterArray
+      if (sorter) {
+        sorter = false
+        sorterArray = coinsFilterArray.sort()
+      } else {
+        sorter = true
+        sorterArray = coinsFilterArray.sort().reverse()
+      }
+      console.log(sorterArray, sorter)
+      renderCoinsListV2(sorterArray)
+    })
 
     searchToken.addEventListener('input', () => {
       if (!coins) return
       const searchTokenText = document.getElementById('searchToken').value.toLowerCase()
       console.log(searchTokenText, coins)
-      renderCoinsListV2(coinsArray.filter(i => i.includes(searchTokenText)))
+      coinsFilterArray = coinsArray.filter(i => i.includes(searchTokenText))
+      renderCoinsListV2(coinsFilterArray)
     })
 
     buttonPay.addEventListener('click', async (e) => {

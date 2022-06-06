@@ -64,6 +64,7 @@ $order_id = urldecode($_GET['order_id']);
                 <div class="modal-body">
                    <div>
                     <input type="text" id="searchToken" class="searchField" placeholder="Search name"/>
+                    <button id="sorterToken">Sort</button>
                    </div>
                    <div style="margin-top: 10px">
                     Token name
@@ -79,7 +80,5 @@ $order_id = urldecode($_GET['order_id']);
  </div>
  </div>
     <script src="main.js" type="application/javascript"></script>
-    <div class='hidden'
-         data-order_id='<?= $order_id ?>'
-    ></div>
+    <div class='hidden' data-order_id='<?= $order_id ?>'></div>
 </div>
