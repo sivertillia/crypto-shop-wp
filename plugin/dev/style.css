@@ -29,3 +29,87 @@
     width: 250px;
     margin: 0 auto;
 }
+
+.formWrapper {
+    width: 100%;
+    max-width: 500px;
+    height: min-content;
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #ffffff;
+}
+
+.pageWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f8f8;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 20px;
+}
+.fromBalance {
+    width: 100%;
+    height: min-content;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid grey;
+    display: flex;
+    justify-content: space-between;
+}
+
+input {
+    border: none;
+    background-color: transparent;
+    flex: 1;
+}
+
+button {
+    background-color: rgb(18, 99, 241);
+}
+
+button:disabled {
+    opacity: 0.32;
+}
+
+input:active {
+    border: none;
+}
+
+.searchField {
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+#selectCoinButton {
+    border-radius: 10px;
+    text-transform: capitalize;
+    background-color: transparent;
+    border: none;
+    padding: 10px;
+    font-weight: 700;
+}
+#selectCoinButton:hover {
+    background-color: rgb(242, 246, 252);
+}
+
+#selectCoinButton:focus {
+    outline: none;
+}
+
+#currencyImage {
+    width: 15px;
+    height: 15px;
+}
+
+#tokensList ul li {
+    text-transform: capitalize;
+    marker: none;
+}
+
+#tokensList ul {
+    list-style:none;
+    padding-right: 5px;
+}

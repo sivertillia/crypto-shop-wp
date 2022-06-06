@@ -44,11 +44,11 @@ module.exports.getOrder = async (req, res) => {
 
 module.exports.getCoins = async () => {
   const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum,bitcoin&vs_currencies=usd`)
-  const ethereum = response?.data?.ethereum?.usd;
-  const bitcoin = response?.data?.bitcoin?.usd;
+  const ethereum = response?.data?.ethereum?.usd
+  const bitcoin = response?.data?.bitcoin?.usd
   return {
-    ethereum: ethereum,
-    bitcoin: bitcoin,
+    ethereum,
+    bitcoin,
   }
 }
 

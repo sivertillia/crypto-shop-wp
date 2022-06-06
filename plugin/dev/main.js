@@ -10,6 +10,8 @@ $(document).ready(() => {
   let wei = 0n;
   let order_id = null;
   let redirect_url = null;
+  let coins = null;
+  let selectedCoin = 'ethereum';
 
 
   const generateQrCode = (valueWei, valueEth) => {
@@ -41,7 +43,7 @@ $(document).ready(() => {
     qrCode.append(document.getElementById('canvas'))
   };
 
-  (() => {
+  (async () => {
     if (window.ethereum) {
       web3 = new Web3(window.ethereum)
     }
@@ -52,11 +54,30 @@ $(document).ready(() => {
     order_id = $('div.hidden').data('order_id')
     eth_usd = $('div.hidden').data('eth_usd')
     redirect_url = $('div.hidden').data('redirect_url')
+
     document.getElementById('account').value = address
+    await init()
+    updateOrderDetails()
     updateCoins(eth_usd)
     updateRender(wei, eth)
     createInterval()
   })();
+
+  async function init (){
+    if (window.ethereum) {
+      window.ethereum.request({ method: 'eth_requestAccounts' })
+      const accounts = await web3.eth.getAccounts()
+      account = accounts[0]
+      window.ethereum.on('accountsChanged', async () => {
+        const accounts = await web3.eth.getAccounts()
+        account = accounts[0]
+        if(account) setAddressIntoButton(account)
+      })
+      if(account) setAddressIntoButton(account);
+      if(selectedCoin) document.getElementById('selectCoinButton').innerText = selectedCoin;
+      document.getElementById('currencyImage').url = `https://cdn.worldvectorlogo.com/logos/${selectedCoin}-1.svg`
+    }
+  }
 
   const formatBalanceInTime = (ms) => {
     const days = Math.floor(ms / (1000 * 60 * 60 * 24))
@@ -74,13 +95,13 @@ $(document).ready(() => {
   }
 
   function createInterval() {
-    const intervalId = setInterval(() => {
-      const time = new Date(created_time).getTime()
-      const cTime = new Date().getTime()
-      const [timer, _] = formatBalanceInTime(cTime-time)
-      if (cTime-time < 0 || Number.isNaN(cTime-time)) clearInterval(intervalId)
-      document.getElementById('time').innerText = timer;
-    }, 100)
+    // const intervalId = setInterval(() => {
+    //   const time = new Date(created_time).getTime()
+    //   const cTime = new Date().getTime()
+    //   const [timer, _] = formatBalanceInTime(cTime-time)
+    //   if (cTime-time < 0 || Number.isNaN(cTime-time)) clearInterval(intervalId)
+    //   document.getElementById('time').innerText = timer;
+    // }, 100)
 
     setInterval(async () => {
       const result = await axios.get(`http://localhost:8000/api/coin?order_id=${order_id}`);
@@ -90,6 +111,7 @@ $(document).ready(() => {
     }, 300_000) //300_000
 
     setInterval(async () => {
+      updateOrderDetails()
       const response = await axios.get(`http://localhost:8000/api/payment?order_id=${order_id}`);
       if (response?.data?.payment) {
         window.location.href = redirect_url;
@@ -98,7 +120,8 @@ $(document).ready(() => {
   }
 
   function updateRender(valueWei, valueEth) {
-    document.getElementById('amount').innerText = `${amount}$ -> ${valueEth} ETH -> ${valueWei} WEI`
+    document.getElementById('amount_input').value = `${amount}$`
+    document.getElementById('converted_amount').value = `${valueEth}`
     document.getElementById('canvas').innerText = ''
     generateQrCode(valueWei, valueEth)
     generateButton(valueWei, valueEth)
@@ -106,8 +129,54 @@ $(document).ready(() => {
 
   function updateCoins(c) {
     console.log(c)
-    eth = amount / c;
-    wei = BigInt(String(eth * 10**18));
+    console.log({ amount, c, eth })
+    if (!amount || !coins) return
+    const convertedValue = amount / coins[selectedCoin]
+    wei = BigInt(String(convertedValue * 10**18));
+  }
+
+  function updateOrderDetails() {
+    axios.get(`http://localhost:8000/api/order?order_id=${order_id}`).then(({ data }) => {
+      address = data.address;
+      amount = data.amount;
+      if (!coins) renderCoinsList(data.coins)
+      coins = data.coins;
+      console.log(data);
+      document.getElementById('amount_input').value = amount;
+      document.getElementById('converted_amount').value = amount / coins[selectedCoin];
+    });
+  }
+
+  function setAddressIntoButton () {
+    console.log('changed', account)
+    const button = document.getElementById('connect_metamask')
+    if (!button || !account) return
+    const first4 = account.slice(0,4)
+    const last4 = account.slice(account.length - 4)
+    button.innerText = `${first4}...${last4}`
+  }
+
+  function renderCoinsList(coins) {
+    const list = document.getElementById("tokensList");
+
+    function makeElem(coinName) {
+      let li = document.createElement('li')
+      li.innerHTML = `${coinName}`;
+      return li;
+    }
+
+    const listContainer = document.createElement('ul');
+    const listFragment = document.createDocumentFragment();
+    Object.keys(coins).forEach((item) => {
+      try {
+        const listElement = makeElem(item);
+        listFragment.append(listElement);
+      } catch (Error) {
+        console.log(Error);
+      }
+    });
+    listContainer.append(listFragment);
+    list.append(listContainer);
   }
 
   function generateButton(valueWei, valueEth) {
@@ -118,12 +187,6 @@ $(document).ready(() => {
     button.addEventListener('click', async (e) => {
       if (window.ethereum) {
         await window.ethereum.request({ method: 'eth_requestAccounts' })
-        const accounts = await web3.eth.getAccounts()
-        account = accounts[0]
-        window.ethereum.on('accountsChanged', async () => {
-          const accounts = await web3.eth.getAccounts()
-          account = accounts[0]
-        })
       }
     })
 
@@ -151,13 +214,13 @@ $(document).ready(() => {
       // })
     })
 
-    buttonGetBalance.addEventListener('click', async (e) => {
-      console.log(address)
-      const ether = ethers.utils.formatEther(await web3.eth.getBalance(address))
-      // const ether = ethers.utils.formatEther(await paymentProcessor.getBalance())
-      // console.log(parseInt((await paymentProcessor.getBalance())._hex, 16))
-      console.log(ether)
-    })
+  //   buttonGetBalance.addEventListener('click', async (e) => {
+  //     console.log(address)
+  //     const ether = ethers.utils.formatEther(await web3.eth.getBalance(address))
+  //     // const ether = ethers.utils.formatEther(await paymentProcessor.getBalance())
+  //     // console.log(parseInt((await paymentProcessor.getBalance())._hex, 16))
+  //     console.log(ether)
+  //   })
   }
 
 });
