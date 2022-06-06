@@ -52,17 +52,22 @@ function wc_crypto_payments_gateway_init()
             $this->method_title = 'Crypto Gateway';
             $this->method_desciption = 'Description of Crypto Payment gateway';
 
-            $this->settings['title'] = 'Pay with debit or credit card';
-            $this->settings['description'] = 'Visa and Mastercard accepted. AMEX, Discover, and prepaid cards are not supported.';
-
             //Load the settings
             $this->init_form_fields();
             $this->init_settings();
 
             //Define user set variable
-//            $this->title = $this->get_option('title');
+            $this->title = $this->get_option('title');
             $this->description = $this->get_option('description');
 //            $this->account = $this->get_option('account');
+
+            add_filter('woocommerce_settings_api_sanitized_fields_' . $this->id, array($this, 'validate_form_options'));
+            add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+        }
+
+        public function validate_form_options($settings)
+        {
+            return $settings;
         }
 
         public function init_form_fields()
@@ -92,7 +97,7 @@ function wc_crypto_payments_gateway_init()
                     'title' => 'Description',
                     'type' => 'textarea',
                     'description' => 'This controls the description which the user sees during checkout.',
-                    'default' => 'Pay with your credit card via our super-cool payment gateway.',
+                    'default' => 'Pay with Bitcoin, Litecoin, or other altcoins.',
                 ),
                 'account' => array(
                     'title' => 'Account',

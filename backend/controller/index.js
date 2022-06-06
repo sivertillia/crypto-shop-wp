@@ -1,25 +1,16 @@
 const Web3 = require('web3')
-const { Payments } = require('../entity/Payments')
 const { state } = require('../state')
 const axios = require('axios')
 const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:9545'))
 
-const toHex = (str) => {
-  let result = ''
-  for (let i = 0; i < str.length; i++) {
-    let hex = str.charCodeAt(i).toString(16)
-    result += ('000' + hex).slice(-4)
-  }
-  return result
-}
-
-module.exports.initPayment = async (req, res) => {
+module.exports.initOrder = async (req, res) => {
   const { order_id, amount, redirect_url } = req.body
   const accountData = web3.eth.accounts.create()
   const password = 'test'
   const account = await web3.eth.personal.importRawKey(accountData.privateKey, password)
   console.log(account, accountData.address)
   await web3.eth.personal.unlockAccount(account, password, 100000)
+  const coins = await this.getCoins()
   state.products.set(order_id, {
     amount: amount,
     address: account,
@@ -27,6 +18,7 @@ module.exports.initPayment = async (req, res) => {
     password: password,
     order_id: order_id,
     redirect_url: redirect_url,
+    coins: coins,
     created_time: new Date().toISOString(),
     updated_time: new Date().toISOString(),
   })
@@ -42,10 +34,8 @@ module.exports.getOrder = async (req, res) => {
   const { order_id } = req.query
   const product = state.products.get(+order_id)
   if (!product) return res.status(400).json({ error: 'Not Found' })
-
-  const coins = this.getCoins()
   res.json({
-    coins: coins,
+    coins: product.coins,
     amount: product.amount,
     created_time: product.created_time,
     address: product.address,
@@ -54,8 +44,8 @@ module.exports.getOrder = async (req, res) => {
 
 module.exports.getCoins = async () => {
   const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum,bitcoin&vs_currencies=usd`)
-  const ethereum = response?.data?.ethereum?.usd
-  const bitcoin = response?.data?.bitcoin?.usd
+  const ethereum = response?.data?.ethereum?.usd;
+  const bitcoin = response?.data?.bitcoin?.usd;
   return {
     ethereum: ethereum,
     bitcoin: bitcoin,
@@ -67,7 +57,8 @@ module.exports.checkPayment = async (req, res) => {
   const product = state.products.get(+order_id)
   if (!product) return res.status(400).json({ error: 'Not Found' })
   const valueAccountN = BigInt(await web3.eth.getBalance(product.address))
-  const productValueN = Web3.utils.toWei(product.amount, 'wei')
+  const eth = product.amount * product.coins.ethereum
+  const productValueN = BigInt(eth * 10 ** 18)
   console.log(productValueN, valueAccountN, valueAccountN >= productValueN)
   if (valueAccountN >= productValueN) {
     const gasPrice = await web3.eth.getGasPrice()
@@ -85,7 +76,7 @@ module.exports.checkPayment = async (req, res) => {
       .catch((error) => {
         console.log(error)
       })
-    res.json({
+    return res.json({
       payment: true,
     })
   }
