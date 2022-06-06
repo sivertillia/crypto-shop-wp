@@ -43,7 +43,8 @@ module.exports.getOrder = async (req, res) => {
   const product = state.products.get(+order_id)
   if (!product) return res.status(400).json({ error: 'Not Found' })
 
-  const coins = this.getCoins()
+  const coins = await this.getCoins()
+
   res.json({
     coins: coins,
     amount: product.amount,
@@ -57,8 +58,8 @@ module.exports.getCoins = async () => {
   const ethereum = response?.data?.ethereum?.usd
   const bitcoin = response?.data?.bitcoin?.usd
   return {
-    ethereum: ethereum,
-    bitcoin: bitcoin,
+    ethereum,
+    bitcoin,
   }
 }
 
@@ -67,7 +68,7 @@ module.exports.checkPayment = async (req, res) => {
   const product = state.products.get(+order_id)
   if (!product) return res.status(400).json({ error: 'Not Found' })
   const valueAccountN = BigInt(await web3.eth.getBalance(product.address))
-  const productValueN = Web3.utils.toWei(product.amount, 'wei')
+  const productValueN = BigInt(product.amount * 10 ** 18)
   console.log(productValueN, valueAccountN, valueAccountN >= productValueN)
   if (valueAccountN >= productValueN) {
     const gasPrice = await web3.eth.getGasPrice()
