@@ -39,17 +39,18 @@ module.exports.getOrder = async (req, res) => {
     amount: product.amount,
     created_time: product.created_time,
     address: product.address,
+    redirect_url: product.redirect_url,
   })
 }
 
 module.exports.getCoins = async () => {
-  const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum,bitcoin&vs_currencies=usd`)
-  const ethereum = response?.data?.ethereum?.usd
-  const bitcoin = response?.data?.bitcoin?.usd
-  return {
-    ethereum,
-    bitcoin,
-  }
+  const arrayCoins = ['ethereum','bitcoin','litecoin']
+  const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${arrayCoins.join(',')}&vs_currencies=usd`)
+  let data = {}
+  arrayCoins.forEach((i) => {
+    data[i] = response.data[i].usd
+  })
+  return data
 }
 
 module.exports.checkPayment = async (req, res) => {
