@@ -1,4 +1,7 @@
 $(document).ready(() => {
+  const api_url = 'http://localhost:8000/api'
+
+
   let web3 = null
   let account = null
   let address = null;
@@ -10,9 +13,10 @@ $(document).ready(() => {
   let order_id = null;
   let redirect_url = null;
   let coins = null;
-  let coinsArray = null;
-  let coinsFilterArray = null;
+  let coinsArray = [];
+  // let useCoinsArray = [];
   let selectedCoin = 'ethereum';
+  let sorterAz = true;
 
   const data = {
     bitcoin: {
@@ -25,6 +29,16 @@ $(document).ready(() => {
       secondaryColor: '#000000',
       logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.svg'
     },
+    litecoin: {
+      primaryColor: '#345d9d',
+      secondaryColor: '#004098',
+      logo: 'https://cryptologos.cc/logos/litecoin-ltc-logo.svg'
+    },
+    dai: {
+      primaryColor: '#f5ac37',
+      secondaryColor: '#d38400',
+      logo: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.svg'
+    }
   }
 
 
@@ -62,11 +76,11 @@ $(document).ready(() => {
       web3 = new Web3(window.ethereum)
     }
     order_id = $('div.hidden').data('order_id')
-
     await init()
-    updateOrderDetails()
+    await updateOrderDetails()
     updateCoins(eth_usd)
-    updateRender(wei, eth)
+    console.log(wei, eth)
+    updateRender(wei, amount/coins[selectedCoin])
     createInterval()
   })();
 
@@ -81,8 +95,6 @@ $(document).ready(() => {
         if(account) setAddressIntoButton(account)
       })
       if(account) setAddressIntoButton(account);
-      if(selectedCoin) document.getElementById('selectCoinButton').innerText = selectedCoin;
-      document.getElementById('currencyImage').url = `https://cdn.worldvectorlogo.com/logos/${selectedCoin}-1.svg`
     }
   }
 
@@ -110,18 +122,11 @@ $(document).ready(() => {
     //   document.getElementById('time').innerText = timer;
     // }, 100)
 
-    // setInterval(async () => {
-    //   const result = await axios.get(`http://localhost:8000/api/coin?order_id=${order_id}`);
-    //   eth_usd = result?.data?.eth;
-    //   updateCoins(eth_usd)
-    //   updateRender(wei, eth)
-    // }, 300_000) //300_000
-
     setInterval(async () => {
-      updateOrderDetails()
-      const response = await axios.get(`http://localhost:8000/api/payment?order_id=${order_id}`);
+      await updateOrderDetails()
+      const response = await axios.get(`${api_url}/payment?order_id=${order_id}`);
       if (response?.data?.payment) {
-        window.location.href = redirect_url;
+        window.location.href = decodeURIComponent(redirect_url);
       }
     }, 3000)
   }
@@ -129,6 +134,7 @@ $(document).ready(() => {
   function updateRender(valueWei, valueEth) {
     document.getElementById('amount_input').value = `${amount}$`
     document.getElementById('converted_amount').value = `${valueEth}`
+    // document.getElementById('sorterToken').innerText = sorterAz ? `A-z` : `Z-a`
     document.getElementById('canvas').innerText = ''
     generateQrCode(valueWei, valueEth)
     generateButton(valueWei, valueEth)
@@ -142,19 +148,18 @@ $(document).ready(() => {
     wei = BigInt(String(convertedValue * 10**18));
   }
 
-  function updateOrderDetails() {
-    axios.get(`http://localhost:8000/api/order?order_id=${order_id}`).then(({ data }) => {
-      address = data.address;
-      amount = data.amount;
-      if (!coinsArray) renderCoinsListV2(Object.keys(data.coins))
-      coinsArray = Object.keys(data.coins)
-      coins = data.coins;
-      const convertedValue = amount / coins[selectedCoin]
-      wei = BigInt(String(convertedValue * 10**18))
-      console.log(data);
-      document.getElementById('amount_input').value = `${amount}$`;
-      document.getElementById('converted_amount').value = amount / coins[selectedCoin];
-    });
+  async function updateOrderDetails() {
+    const { data } = await axios.get(`${api_url}/order?order_id=${order_id}`)
+    address = data.address;
+    amount = data.amount;
+    if (!coinsArray.length) sorterTokens(Object.keys(data.coins), false)
+    coinsArray = Object.keys(data.coins)
+    coins = data.coins;
+    redirect_url = data.redirect_url;
+    const convertedValue = amount / coins[selectedCoin]
+    wei = BigInt(String(convertedValue * 10**18))
+    document.getElementById('amount_input').value = `${amount}$`;
+    document.getElementById('converted_amount').value = amount / coins[selectedCoin];
   }
 
   function setAddressIntoButton () {
@@ -166,42 +171,30 @@ $(document).ready(() => {
     button.innerText = `${first4}...${last4}`
   }
 
-  function renderCoinsListV2(coins) {
+  function renderCoinsList(coinsNames) {
     const list = document.getElementById("tokensList");
     list.innerHTML = null;
 
     function makeElem(coinName) {
       let li = document.createElement('li')
-      li.innerHTML = `${coinName}`;
-      return li;
-    }
-
-    const listContainer = document.createElement('ul');
-    const listFragment = document.createDocumentFragment();
-    coins.forEach((item) => {
-      try {
-        const listElement = makeElem(item);
-        listFragment.append(listElement);
-      } catch (Error) {
-        console.log(Error);
+      li.innerHTML = `<img id="currencyImage" src="${data[coinName].logo}">${coinName}`;
+      li.setAttribute("data-dismiss","modal")
+      li.className = 'pointer'
+      li.onclick = () => {
+        $('#selectCurrencyModal').modal('hide')
+        selectedCoin = coinName;
+        const convertedValue = amount / coins[selectedCoin]
+        wei = BigInt(String(convertedValue * 10**18))
+        updateRender(wei, amount/coins[coinName])
+        document.getElementById('searchToken').value = ''
+        sorterTokens()
       }
-    });
-    listContainer.append(listFragment);
-    list.append(listContainer);
-  }
-
-  function renderCoinsList(coins) {
-    const list = document.getElementById("tokensList");
-
-    function makeElem(coinName) {
-      let li = document.createElement('li')
-      li.innerHTML = `${coinName}`;
       return li;
     }
 
     const listContainer = document.createElement('ul');
     const listFragment = document.createDocumentFragment();
-    Object.keys(coins).forEach((item) => {
+    coinsNames.forEach((item) => {
       try {
         const listElement = makeElem(item);
         listFragment.append(listElement);
@@ -219,38 +212,28 @@ $(document).ready(() => {
     const searchToken = document.getElementById('searchToken')
     const sorterToken = document.getElementById('sorterToken')
 
-    button.addEventListener('click', async (e) => {
+    if (selectedCoin) {
+      document.getElementById('selectCoinButton').innerHTML = `<img id="currencyImage" src="${data[selectedCoin].logo}" /> ${selectedCoin}`;
+    }
+
+    button.onclick = async (e) => {
       if (window.ethereum) {
         await window.ethereum.request({ method: 'eth_requestAccounts' })
       }
-    })
-    let sorter = true;
+    }
 
-    sorterToken.addEventListener('click', async (e) => {
-      let sorterArray
-      if (sorter) {
-        sorter = false
-        sorterArray = coinsFilterArray.sort()
-      } else {
-        sorter = true
-        sorterArray = coinsFilterArray.sort().reverse()
-      }
-      console.log(sorterArray, sorter)
-      renderCoinsListV2(sorterArray)
-    })
+    sorterToken.onclick = async (e) => {
+      sorterTokens()
+    }
 
-    searchToken.addEventListener('input', () => {
+    searchToken.oninput = () => {
       if (!coins) return
       const searchTokenText = document.getElementById('searchToken').value.toLowerCase()
-      console.log(searchTokenText, coins)
-      coinsFilterArray = coinsArray.filter(i => i.includes(searchTokenText))
-      renderCoinsListV2(coinsFilterArray)
-    })
+      // renderCoinsList([...coinsArray].filter(i => i.includes(searchTokenText)))
+      sorterTokens([...coinsArray].filter(i => i.includes(searchTokenText)), false)
+    }
 
-    buttonPay.addEventListener('click', async (e) => {
-      console.log('Click')
-      // const price = ethers.utils.parseEther('0.1', 'ether')
-      // await web3.
+    buttonPay.onclick = async (e) => {
       console.log(typeof valueWei, valueWei)
       window.ethereum
         .request({
@@ -263,21 +246,22 @@ $(document).ready(() => {
         })
         .then(txHash => console.log(txHash))
         .catch(error => console.log(error))
-      // await lcContract.methods.pay('1').send({
-      //   from: account,
-      //   value: '10000000000000000',
-      //   gas: 300000,
-      //   gasPrice: null,
-      // })
-    })
-
-  //   buttonGetBalance.addEventListener('click', async (e) => {
-  //     console.log(address)
-  //     const ether = ethers.utils.formatEther(await web3.eth.getBalance(address))
-  //     // const ether = ethers.utils.formatEther(await paymentProcessor.getBalance())
-  //     // console.log(parseInt((await paymentProcessor.getBalance())._hex, 16))
-  //     console.log(ether)
-  //   })
+    }
   }
 
+  function sorterTokens(data = [...coinsArray], isSort = false) {
+    const sorterToken = document.getElementById('sorterToken')
+    let sorterArray = [...data]
+    if (sorterAz) {
+      sorterArray = sorterArray.sort()
+    } else {
+      sorterArray = sorterArray.sort().reverse()
+    }
+    sorterToken.innerText = sorterAz ? `A-z` : `Z-a`
+    if (isSort) {
+      sorterAz = !sorterAz
+    }
+
+    renderCoinsList(sorterArray)
+  }
 });
