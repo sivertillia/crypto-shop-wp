@@ -1,7 +1,7 @@
 const Web3 = require('web3')
 const { state } = require('../state')
 const axios = require('axios')
-const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:9545'))
+const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'))
 
 module.exports.initOrder = async (req, res) => {
   const { order_id, amount, redirect_url } = req.body

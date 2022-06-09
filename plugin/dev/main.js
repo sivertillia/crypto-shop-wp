@@ -77,7 +77,7 @@ $(document).ready(() => {
       web3 = new Web3(window.ethereum)
       connectWalletProvider = new WalletConnectProvider.default({
             infuraId: 'e2efd46ef94342c2831c09672c6846a1',
-            rpc: {1337: "http://localhost:9545/"}
+            rpc: {1337: "http://localhost:8545/"}
           });
     }
     order_id = $('div.hidden').data('order_id')
@@ -290,16 +290,18 @@ $(document).ready(() => {
 
     buttonPay.onclick = async (e) => {
       console.log(typeof valueWei, valueWei)
-      let wallet, value
+      let wallet, value, gas
 
       switch (localStorage.getItem('wallet')) {
         case 'metamask':
           wallet = window.ethereum
           value = valueWei.toString(16)
+          gas: 21000n.toString(16)
           break
         case 'trustWallet':
           wallet = connectWalletProvider
           value = String(valueWei).toString(16)
+          gas = String(25000).toString(16)
           break
         default: return;
       }
@@ -311,6 +313,7 @@ $(document).ready(() => {
             from: account,
             to: address,
             value,
+            gas,
           }],
         })
         .then(txHash => console.log(txHash))
