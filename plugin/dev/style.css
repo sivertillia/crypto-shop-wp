@@ -176,3 +176,82 @@ input:active {
 .pointer {
     cursor: pointer;
 }
+
+.listContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 0 32px 16px;
+}
+
+.walletButton {
+    background-color: rgba(18, 99, 241, 0.16);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    border-radius: 8px;
+    width: 170px;
+    height: 91px;
+    border: 1px solid rgba(18, 99, 241, 0.16);
+    transition: background-color 0.5s ease;
+}
+
+.walletButton:hover {
+    background-color: rgb(242, 246, 252);
+}
+
+.walletButton:active {
+    outline: none;
+    border: 1px solid rgb(18, 99, 241);
+    background-color: transparent;
+}
+
+.modal-dialog {
+    max-width: 420px;
+    width: 100%;
+}
+
+.column-container {
+    display: flex;
+    flex-direction: column;
+    padding: 0 16px 16px;
+    align-items: center;
+    gap: 16px;
+}
+
+.btn .btn-primary {
+    color: white;
+    transition: background-color 0.2s ease 0s, opacity 0.2s ease 0s;
+    background-color: rgb(18, 99, 241);
+    border-radius: 8px;
+}
+
+.modal-header {
+    border: none;
+}
+.modal-title {
+    text-transform: capitalize;
+}
+
+button .close {
+    color: black;
+}
+
+.row-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.walletStatus {
+    color: rgb(29, 200, 114);
+    text-transform: none;
+}
+
+#connectedAccount {
+    font-size: 14px;
+}

@@ -25,6 +25,7 @@ $order_id = urldecode($_GET['order_id']);
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4-rc.0/web3.min.js"
             type="application/javascript"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.1/dist/umd/index.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
     <script type="text/javascript" src="https://unpkg.com/axios@0.27.2/dist/axios.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
@@ -55,7 +56,7 @@ $order_id = urldecode($_GET['order_id']);
                     NULL
                 </button>
             </div>
-            <button class="btn btn-primary" id="connect_metamask">
+            <button class="btn btn-primary" id="connect_wallet">
                 Connect Wallet
             </button>
             <button id="pay_metamask" class="btn btn-primary">Pay</button>
@@ -90,7 +91,66 @@ $order_id = urldecode($_GET['order_id']);
                 </div>
             </div>
         </div>
+<!--        ------------->
     </div>
+       <div class="modal fade" id="selectWalletModal" tabindex="-1" role="dialog"
+                                 aria-labelledby="selectWalletModal" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content" style="border-radius: 15px;">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Connect to a wallet</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                           <div id="walletsListContainer" class="listContainer">
+                                               <button id="selectWalletConnection-metaMask" class="selectCoinButton walletButton">
+                                                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/800px-MetaMask_Fox.svg.png" style="width: 32px;" />
+                                                   Metamask
+                                               </button>
+                                               <button id="selectWalletConnection-trustWallet" class="selectCoinButton walletButton">
+                                                   <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" style="width: 32px;" />
+                                                   Trust Wallet
+                                               </button>
+                                           </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+<!----------------->
+<div class="modal fade" id="yourWalletModal" tabindex="-1" role="dialog"
+     aria-labelledby="yourWalletModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="border-radius: 15px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Your Wallet</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="column-container">
+                    <div class="row-container">
+                        <h6 class="walletStatus">Connected</h6>
+                        <button type="button" id="changeWalletButton" class="btn btn-primary" style="max-width:135px;">
+                            Change Wallet
+                        </button>
+                    </div>
+                    <div id="connectedAccount"></div>
+                    <button type="button" id="logoutButton" class="btn btn-primary" style="max-width:135px;">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<!----------------------->
     <script src="main.js" type="application/javascript"></script>
     <div class='hidden' data-order_id='<?= $order_id ?>'></div>
 </div>

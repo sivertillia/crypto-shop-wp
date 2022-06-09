@@ -2,7 +2,8 @@ $(document).ready(() => {
   const api_url = 'http://localhost:8000/api'
 
 
-  let web3 = null
+  let web3 = null;
+  let connectWalletProvider = null;
   let account = null
   let address = null;
   let amount = null;
@@ -74,6 +75,10 @@ $(document).ready(() => {
   (async () => {
     if (window.ethereum) {
       web3 = new Web3(window.ethereum)
+      connectWalletProvider = new WalletConnectProvider.default({
+            infuraId: 'e2efd46ef94342c2831c09672c6846a1',
+            rpc: {1337: "http://localhost:9545/"}
+          });
     }
     order_id = $('div.hidden').data('order_id')
     await init()
@@ -86,16 +91,60 @@ $(document).ready(() => {
 
   async function init (){
     if (window.ethereum) {
-      window.ethereum.request({ method: 'eth_requestAccounts' })
+      const currentWallet = localStorage.getItem('wallet')
+      switch (currentWallet) {
+        case 'metamask': await connectMetamaskWallet()
+              break;
+        case 'trustWallet': await connectTrustWallet()
+              break;
+        default: return;
+      }
+      setAddressIntoButton()
+    }
+  }
+
+  async function connectMetamaskWallet () {
+    window.ethereum.request({ method: 'eth_requestAccounts' })
+    const accounts = await web3.eth.getAccounts()
+    account = accounts[0]
+    window.ethereum.on('accountsChanged', async () => {
       const accounts = await web3.eth.getAccounts()
       account = accounts[0]
-      window.ethereum.on('accountsChanged', async () => {
-        const accounts = await web3.eth.getAccounts()
-        account = accounts[0]
-        if(account) setAddressIntoButton(account)
-      })
-      if(account) setAddressIntoButton(account);
-    }
+      setAddressIntoButton()
+    })
+    setWallet('metamask')
+    setAddressIntoButton()
+  }
+
+  async function connectTrustWallet() {
+    console.log({ connectWalletProvider: connectWalletProvider })
+    const accounts = await connectWalletProvider.enable()
+    console.log(accounts)
+    account = accounts[0]
+    $('#selectWalletModal').modal('hide')
+    connectWalletProvider.on('accountsChanged', async (accounts) => {
+      account = accounts[0]
+      setAddressIntoButton()
+      console.log('bbbbbbb')
+    })
+    setWallet('trustWallet')
+    setAddressIntoButton()
+
+    connectWalletProvider.on('disconnect', async () => {
+      await logout()
+    })
+  }
+
+  function setWallet(wallet) {
+    localStorage.setItem('wallet', wallet)
+  }
+
+  async function logout() {
+    localStorage.removeItem('wallet')
+    account = null
+    setAddressIntoButton()
+    updateRender(wei, amount / coins[selectedCoin])
+    // if (connectWalletProvider) connectWalletProvider.disconnect()
   }
 
   const formatBalanceInTime = (ms) => {
@@ -164,11 +213,19 @@ $(document).ready(() => {
 
   function setAddressIntoButton () {
     console.log('changed', account)
-    const button = document.getElementById('connect_metamask')
-    if (!button || !account) return
+    const button = document.getElementById('connect_wallet')
+    const connectedAccountRow = document.getElementById('connectedAccount')
+    if (!button) return
+    disablePayButtonStatus(!account)
+    if (!account || !localStorage.getItem('wallet')) {
+      connectedAccountRow.innerText = 'Disconnected'
+      return button.innerText = 'Connect Wallet';
+    }
+
     const first4 = account.slice(0,4)
     const last4 = account.slice(account.length - 4)
     button.innerText = `${first4}...${last4}`
+    connectedAccountRow.innerText = account
   }
 
   function renderCoinsList(coinsNames) {
@@ -207,19 +264,17 @@ $(document).ready(() => {
   }
 
   function generateButton(valueWei, valueEth) {
-    const button = document.getElementById('connect_metamask')
     const buttonPay = document.getElementById('pay_metamask')
+    const changeWalletButton = document.getElementById('changeWalletButton')
+    const connectWalletButton = document.getElementById('connect_wallet')
+    const connectMetamaskWalletButton = document.getElementById('selectWalletConnection-metaMask')
+    const connectTrustWalletButton = document.getElementById('selectWalletConnection-trustWallet')
+    const logoutButton = document.getElementById('logoutButton')
     const searchToken = document.getElementById('searchToken')
     const sorterToken = document.getElementById('sorterToken')
 
     if (selectedCoin) {
       document.getElementById('selectCoinButton').innerHTML = `<img id="currencyImage" src="${data[selectedCoin].logo}" /> ${selectedCoin}`;
-    }
-
-    button.onclick = async (e) => {
-      if (window.ethereum) {
-        await window.ethereum.request({ method: 'eth_requestAccounts' })
-      }
     }
 
     sorterToken.onclick = async (e) => {
@@ -235,18 +290,64 @@ $(document).ready(() => {
 
     buttonPay.onclick = async (e) => {
       console.log(typeof valueWei, valueWei)
-      window.ethereum
+      let wallet, value
+
+      switch (localStorage.getItem('wallet')) {
+        case 'metamask':
+          wallet = window.ethereum
+          value = valueWei.toString(16)
+          break
+        case 'trustWallet':
+          wallet = connectWalletProvider
+          value = valueWei.toString().toString(16)
+          break
+        default: return;
+      }
+
+      wallet
         .request({
           method: 'eth_sendTransaction',
           params:[{
             from: account,
             to: address,
-            value: valueWei.toString(16),
+            value,
           }],
         })
         .then(txHash => console.log(txHash))
         .catch(error => console.log(error))
     }
+
+    connectMetamaskWalletButton.onclick = async (e) => {
+      if (window.ethereum) {
+        await connectMetamaskWallet()
+        $('#selectWalletModal').modal('hide')
+      }
+    }
+
+    connectTrustWalletButton.onclick = async (e) => {
+      if (window.ethereum) {
+        await connectTrustWallet()
+      }
+    }
+
+    connectWalletButton.onclick = async (e) => {
+      if (!account) return $('#selectWalletModal').modal('show')
+
+      $('#yourWalletModal').modal('show')
+    }
+
+    changeWalletButton.onclick = async () => {
+      await logout()
+      $('#yourWalletModal').modal('hide')
+      $('#selectWalletModal').modal('show')
+    }
+
+    logoutButton.onclick = async () => {
+      await logout()
+      $('#yourWalletModal').modal('hide')
+    }
+
+    disablePayButtonStatus(!account)
   }
 
   function sorterTokens(data = [...coinsArray], isSort = false) {
@@ -263,5 +364,10 @@ $(document).ready(() => {
     }
 
     renderCoinsList(sorterArray)
+  }
+
+  function disablePayButtonStatus(status) {
+    const payButton = document.getElementById('pay_metamask')
+    if (payButton) payButton.disabled = status
   }
 });
