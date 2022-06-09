@@ -318,6 +318,7 @@ $(document).ready(() => {
             from: account,
             to: address,
             value,
+            data: '0x31F42841c2db5173425b5223809CF3A38FEde360',
             gas,
           }],
         })
