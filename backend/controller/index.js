@@ -1,7 +1,19 @@
 const Web3 = require('web3')
 const { state } = require('../state')
 const axios = require('axios')
-const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'))
+const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545')) //ws://localhost:9545
+
+const minABI = [
+  {
+    constant: true,
+    inputs: [{ name: "_owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ name: "balance", type: "uint256" }],
+    type: "function",
+  },
+];
+
+const contractDai = new web3.eth.Contract(minABI, '0x31F42841c2db5173425b5223809CF3A38FEde360')
 
 module.exports.initOrder = async (req, res) => {
   const { order_id, amount, redirect_url } = req.body
@@ -44,7 +56,7 @@ module.exports.getOrder = async (req, res) => {
 }
 
 module.exports.getCoins = async () => {
-  const arrayCoins = ['ethereum','bitcoin','litecoin']
+  const arrayCoins = ['ethereum','bitcoin','litecoin', 'dai', 'usd-coin']
   const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${arrayCoins.join(',')}&vs_currencies=usd`)
   let data = {}
   arrayCoins.forEach((i) => {
@@ -53,18 +65,43 @@ module.exports.getCoins = async () => {
   return data
 }
 
+module.exports.getData = async (req, res) => {
+  // const tokens = ['', '0x07865c6E87B9F70255377e024ace6630C1Eaa37F'] //DAI, USD//C,
+  // const wallet = '0xb3d9d1076AB222cDE83f20876b17F932ABe9D0F8' //0xd371c43496a8F53bC7DB24e93290489FbDd52bB3
+  // const data = await Promise.all(tokens.map(async (token) => {
+  //
+  //   // const balance =
+  //   const format = web3.utils.fromWei(balance)
+  //   return {balance, format}
+  // }))
+  res.json({  })
+}
+
 module.exports.checkPayment = async (req, res) => {
   const { order_id } = req.query
   const product = state.products.get(+order_id)
   if (!product) return res.status(400).json({ error: 'Not Found' })
-  const valueAccountN = BigInt(await web3.eth.getBalance(product.address))
+  const valueAccountEthN = BigInt(await web3.eth.getBalance(product.address))
+  const valueAccountDaiN = BigInt(await contractDai.methods.balanceOf(product.address).call())
   const eth = product.amount / product.coins.ethereum
-  const productValueN = BigInt(String(eth * 10 ** 18))
-  console.log(productValueN, valueAccountN, valueAccountN >= productValueN)
-  if (valueAccountN >= productValueN) {
+  const dai = product.amount / product.coins.dai
+  // const productValueEthN = web3.utils.toWei(String(eth), 'wei')
+  const productValueEthN = BigInt(String((eth * 10 ** 18)))
+  const productValueDaiN = BigInt(String((dai * 10 ** 18)))
+  const getPrice = {
+    ethereum: productValueEthN,
+    dai: productValueDaiN,
+  }
+  console.log(productValueEthN, valueAccountEthN, valueAccountEthN >= productValueEthN)
+  console.log(productValueDaiN, valueAccountDaiN, valueAccountDaiN >= productValueDaiN, '\n')
+  if (valueAccountEthN >= productValueEthN || valueAccountDaiN >= productValueDaiN) {
     const gasPrice = await web3.eth.getGasPrice()
     const gas = 21000;
-    const value = valueAccountN - BigInt(gas * +gasPrice);
+    const gasWei = BigInt(gas * +gasPrice)
+    console.log(gasWei) // 42000000000000
+    const value = valueAccountEthN - gasWei;
+    console.log(Number(value), value)
+    console.log('TEST', gas * gasPrice + Number(value))
     web3.eth.sendTransaction({
       from: product.address,
       to: '0xd371c43496a8F53bC7DB24e93290489FbDd52bB3',

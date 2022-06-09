@@ -13,7 +13,7 @@ app.use('/file', express.static(__dirname + '/public'))
 
 app.use('/api', router);
 (async () => {
-  const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'))
+	const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'))
   createCron(web3)
 })();
 

@@ -39,6 +39,11 @@ $(document).ready(() => {
       primaryColor: '#f5ac37',
       secondaryColor: '#d38400',
       logo: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.svg'
+    },
+    'usd-coin': {
+      primaryColor: '#2775caff',
+      secondaryColor: '#004083',
+      logo: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.svg'
     }
   }
 
@@ -193,8 +198,8 @@ $(document).ready(() => {
     console.log(c)
     console.log({ amount, c, eth })
     if (!amount || !coins) return
-    const convertedValue = amount / coins[selectedCoin]
-    wei = BigInt(String(convertedValue * 10**18));
+    const convertedValue = amount / coins['ethereum']
+    wei = BigInt(String(Math.ceil(convertedValue * 10**18)))
   }
 
   async function updateOrderDetails() {
@@ -205,8 +210,8 @@ $(document).ready(() => {
     coinsArray = Object.keys(data.coins)
     coins = data.coins;
     redirect_url = data.redirect_url;
-    const convertedValue = amount / coins[selectedCoin]
-    wei = BigInt(String(convertedValue * 10**18))
+    const convertedValue = amount / coins['ethereum']
+    wei = BigInt(String(Math.ceil(convertedValue * 10**18)))
     document.getElementById('amount_input').value = `${amount}$`;
     document.getElementById('converted_amount').value = amount / coins[selectedCoin];
   }
@@ -241,7 +246,7 @@ $(document).ready(() => {
         $('#selectCurrencyModal').modal('hide')
         selectedCoin = coinName;
         const convertedValue = amount / coins[selectedCoin]
-        wei = BigInt(String(convertedValue * 10**18))
+        wei = BigInt(String(Math.ceil(convertedValue * 10**18)))
         updateRender(wei, amount/coins[coinName])
         document.getElementById('searchToken').value = ''
         sorterTokens()
