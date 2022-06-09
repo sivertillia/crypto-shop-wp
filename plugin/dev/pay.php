@@ -91,35 +91,36 @@ $order_id = urldecode($_GET['order_id']);
                 </div>
             </div>
         </div>
-<!--        ------------->
+        <!-------------->
     </div>
-       <div class="modal fade" id="selectWalletModal" tabindex="-1" role="dialog"
-                                 aria-labelledby="selectWalletModal" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content" style="border-radius: 15px;">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel">Connect to a wallet</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                           <div id="walletsListContainer" class="listContainer">
-                                               <button id="selectWalletConnection-metaMask" class="selectCoinButton walletButton">
-                                                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/800px-MetaMask_Fox.svg.png" style="width: 32px;" />
-                                                   Metamask
-                                               </button>
-                                               <button id="selectWalletConnection-trustWallet" class="selectCoinButton walletButton">
-                                                   <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" style="width: 32px;" />
-                                                   Trust Wallet
-                                               </button>
-                                           </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="modal fade" id="selectWalletModal" tabindex="-1" role="dialog"
+         aria-labelledby="selectWalletModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="border-radius: 15px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Connect to a wallet</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="walletsListContainer" class="listContainer">
+                        <button id="selectWalletConnection-metaMask" class="selectCoinButton walletButton">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/MetaMask_Fox.svg/800px-MetaMask_Fox.svg.png"
+                                 style="width: 32px;"/>
+                            Metamask
+                        </button>
+                        <button id="selectWalletConnection-trustWallet" class="selectCoinButton walletButton">
+                            <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" style="width: 32px;"/>
+                            Trust Wallet
+                        </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
 <!----------------->
 <div class="modal fade" id="yourWalletModal" tabindex="-1" role="dialog"
      aria-labelledby="yourWalletModal" aria-hidden="true">
@@ -151,6 +152,6 @@ $order_id = urldecode($_GET['order_id']);
 </div>
 </div>
 <!----------------------->
-    <script src="main.js" type="application/javascript"></script>
-    <div class='hidden' data-order_id='<?= $order_id ?>'></div>
+<script src="main.js" type="application/javascript"></script>
+<div class='hidden' data-order_id='<?= $order_id ?>'></div>
 </div>

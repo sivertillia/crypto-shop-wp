@@ -299,7 +299,7 @@ $(document).ready(() => {
           break
         case 'trustWallet':
           wallet = connectWalletProvider
-          value = valueWei.toString().toString(16)
+          value = String(valueWei).toString(16)
           break
         default: return;
       }
