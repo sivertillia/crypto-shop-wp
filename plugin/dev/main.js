@@ -19,6 +19,7 @@ $(document).ready(() => {
   let selectedCoin = 'ethereum';
   let sorterAz = true;
 
+
   const data = {
     bitcoin: {
       primaryColor: '#f7931a',
@@ -49,12 +50,18 @@ $(document).ready(() => {
 
 
   const generateQrCode = (valueWei, valueEth) => {
+    let dataLink = null
+    if (['dai', 'usd-coin', 'litecoin'].includes(selectedCoin)) {
+      dataLink = address
+    } else {
+      dataLink = `${selectedCoin}:${address}?gas=21000&value=${String(valueWei)}`
+    }
     const qrCode = new QRCodeStyling({
       width: 300,
       height: 300,
       margin: 15,
       type: 'svg',
-      data: `${selectedCoin}:${address}?gas=21000&value=${String(valueWei)}`,
+      data: dataLink,
       image: data[selectedCoin].logo,
       // image: `https://cdn.worldvectorlogo.com/logos/${selectedCoin}.svg`,
       // image: 'https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg',
@@ -310,6 +317,323 @@ $(document).ready(() => {
           break
         default: return;
       }
+      if (selectedCoin === 'dai') {
+        // const minABI = [
+        //   {
+        //     "inputs": [],
+        //     "stateMutability": "nonpayable",
+        //     "type": "constructor"
+        //   },
+        //   {
+        //     "anonymous": false,
+        //     "inputs": [
+        //       {
+        //         "indexed": true,
+        //         "internalType": "address",
+        //         "name": "owner",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "indexed": true,
+        //         "internalType": "address",
+        //         "name": "spender",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "indexed": false,
+        //         "internalType": "uint256",
+        //         "name": "value",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "name": "Approval",
+        //     "type": "event"
+        //   },
+        //   {
+        //     "anonymous": false,
+        //     "inputs": [
+        //       {
+        //         "indexed": true,
+        //         "internalType": "address",
+        //         "name": "from",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "indexed": true,
+        //         "internalType": "address",
+        //         "name": "to",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "indexed": false,
+        //         "internalType": "uint256",
+        //         "name": "value",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "name": "Transfer",
+        //     "type": "event"
+        //   },
+        //   {
+        //     "inputs": [
+        //       {
+        //         "internalType": "address",
+        //         "name": "owner",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "internalType": "address",
+        //         "name": "spender",
+        //         "type": "address"
+        //       }
+        //     ],
+        //     "name": "allowance",
+        //     "outputs": [
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "stateMutability": "view",
+        //     "type": "function",
+        //     "constant": true
+        //   },
+        //   {
+        //     "inputs": [
+        //       {
+        //         "internalType": "address",
+        //         "name": "spender",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "amount",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "name": "approve",
+        //     "outputs": [
+        //       {
+        //         "internalType": "bool",
+        //         "name": "",
+        //         "type": "bool"
+        //       }
+        //     ],
+        //     "stateMutability": "nonpayable",
+        //     "type": "function"
+        //   },
+        //   {
+        //     "inputs": [
+        //       {
+        //         "internalType": "address",
+        //         "name": "account",
+        //         "type": "address"
+        //       }
+        //     ],
+        //     "name": "balanceOf",
+        //     "outputs": [
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "stateMutability": "view",
+        //     "type": "function",
+        //     "constant": true
+        //   },
+        //   {
+        //     "inputs": [],
+        //     "name": "decimals",
+        //     "outputs": [
+        //       {
+        //         "internalType": "uint8",
+        //         "name": "",
+        //         "type": "uint8"
+        //       }
+        //     ],
+        //     "stateMutability": "view",
+        //     "type": "function",
+        //     "constant": true
+        //   },
+        //   {
+        //     "inputs": [
+        //       {
+        //         "internalType": "address",
+        //         "name": "spender",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "subtractedValue",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "name": "decreaseAllowance",
+        //     "outputs": [
+        //       {
+        //         "internalType": "bool",
+        //         "name": "",
+        //         "type": "bool"
+        //       }
+        //     ],
+        //     "stateMutability": "nonpayable",
+        //     "type": "function"
+        //   },
+        //   {
+        //     "inputs": [
+        //       {
+        //         "internalType": "address",
+        //         "name": "spender",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "addedValue",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "name": "increaseAllowance",
+        //     "outputs": [
+        //       {
+        //         "internalType": "bool",
+        //         "name": "",
+        //         "type": "bool"
+        //       }
+        //     ],
+        //     "stateMutability": "nonpayable",
+        //     "type": "function"
+        //   },
+        //   {
+        //     "inputs": [],
+        //     "name": "name",
+        //     "outputs": [
+        //       {
+        //         "internalType": "string",
+        //         "name": "",
+        //         "type": "string"
+        //       }
+        //     ],
+        //     "stateMutability": "view",
+        //     "type": "function",
+        //     "constant": true
+        //   },
+        //   {
+        //     "inputs": [],
+        //     "name": "symbol",
+        //     "outputs": [
+        //       {
+        //         "internalType": "string",
+        //         "name": "",
+        //         "type": "string"
+        //       }
+        //     ],
+        //     "stateMutability": "view",
+        //     "type": "function",
+        //     "constant": true
+        //   },
+        //   {
+        //     "inputs": [],
+        //     "name": "totalSupply",
+        //     "outputs": [
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "stateMutability": "view",
+        //     "type": "function",
+        //     "constant": true
+        //   },
+        //   {
+        //     "inputs": [
+        //       {
+        //         "internalType": "address",
+        //         "name": "recipient",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "amount",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "name": "transfer",
+        //     "outputs": [
+        //       {
+        //         "internalType": "bool",
+        //         "name": "",
+        //         "type": "bool"
+        //       }
+        //     ],
+        //     "stateMutability": "nonpayable",
+        //     "type": "function"
+        //   },
+        //   {
+        //     "inputs": [
+        //       {
+        //         "internalType": "address",
+        //         "name": "sender",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "internalType": "address",
+        //         "name": "recipient",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "amount",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "name": "transferFrom",
+        //     "outputs": [
+        //       {
+        //         "internalType": "bool",
+        //         "name": "",
+        //         "type": "bool"
+        //       }
+        //     ],
+        //     "stateMutability": "nonpayable",
+        //     "type": "function"
+        //   },
+        //   {
+        //     "inputs": [
+        //       {
+        //         "internalType": "address",
+        //         "name": "to",
+        //         "type": "address"
+        //       },
+        //       {
+        //         "internalType": "uint256",
+        //         "name": "amount",
+        //         "type": "uint256"
+        //       }
+        //     ],
+        //     "name": "faucet",
+        //     "outputs": [],
+        //     "stateMutability": "nonpayable",
+        //     "type": "function"
+        //   }
+        // ];
+        // const minABI2 = [
+        //   {
+        //     constant: true,
+        //     inputs: [{ name: "_owner", type: "address" }],
+        //     name: "balanceOf",
+        //     outputs: [{ name: "balance", type: "uint256" }],
+        //     type: "function",
+        //   },
+        // ];
+        // const daiContract = new web3.eth.Contract(minABI2, '0x31F42841c2db5173425b5223809CF3A38FEde360')
+        // console.log(daiContract)
+        // const tx1 = await daiContract.methods.approve(address, ethers.utils.parseEther('0.01'))
+        // await tx1.wait()
+        // return
+      }
 
       wallet
         .request({
@@ -317,8 +641,7 @@ $(document).ready(() => {
           params:[{
             from: account,
             to: address,
-            value,
-            data: '0x31F42841c2db5173425b5223809CF3A38FEde360',
+            // value,
             gas,
           }],
         })

@@ -45,7 +45,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f8f8f8;
+    /*background-color: #f8f8f8;*/
+    background-color: inherit;
     flex-direction: column;
     box-sizing: border-box;
     padding: 20px;
@@ -148,6 +149,7 @@ input:active {
     text-transform: capitalize;
     marker: none;
     padding: 5px 16px;
+    display: flex;
 }
 
 #tokensList ul li:hover {
@@ -159,6 +161,7 @@ input:active {
     padding-left: 0;
     max-height: 400px;
     overflow: auto;
+    margin: 0;
     /*border: 1px solid black;*/
     /*border-radius: 10px;*/
 }
@@ -254,4 +257,9 @@ button .close {
 
 #connectedAccount {
     font-size: 14px;
+}
+
+/*Hide navigation*/
+.storefront-breadcrumb {
+    display: none;
 }

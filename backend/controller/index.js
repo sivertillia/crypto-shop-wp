@@ -63,6 +63,7 @@ module.exports.getCoins = async () => {
   arrayCoins.forEach((i) => {
     data[i] = response.data[i].usd
   })
+  data['usd-coin'] = 1.0
   return data
 }
 
@@ -92,7 +93,7 @@ module.exports.checkPayment = async (req, res) => {
   // const productValueEthN = web3.utils.toWei(String(eth), 'wei')
   const productValueEthN = BigInt(String(Math.ceil(eth * 10 ** 18)))
   const productValueDaiN = BigInt(String(Math.ceil(dai * 10 ** 18)))
-  const productValueUsdcN = BigInt(String(Math.ceil(usdc * 10 ** 18)))
+  const productValueUsdcN = BigInt(String(Math.ceil(usdc * 1_000_000)))
   const getPrice = {
     ethereum: productValueEthN,
     dai: productValueDaiN,
